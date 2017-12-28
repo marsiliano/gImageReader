@@ -283,6 +283,11 @@ HOCRPdfExporter::HOCRPdfExporter(const HOCRDocument* hocrdocument, const HOCRPag
 	ui.comboBoxImageCompression->addItem(_("Jpeg (lossy)"), PDFSettings::CompressJpeg);
 	ui.comboBoxImageCompression->setCurrentIndex(-1);
 
+    // Setting additional PDF info
+    ui.lineEditAuthor->setText("gImageReader");
+    ui.lineEditCreator->setText("gImageReader");
+    ui.lineEditProducer->setText("gImageReader");
+
 	connect(ui.comboBoxOutputMode, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePreview()));
 	connect(ui.comboBoxImageFormat, SIGNAL(currentIndexChanged(int)), this, SLOT(updatePreview()));
 	connect(ui.comboBoxImageFormat, SIGNAL(currentIndexChanged(int)), this, SLOT(imageFormatChanged()));
@@ -368,13 +373,13 @@ bool HOCRPdfExporter::run(QString& filebasename) {
 #endif
 
 	QString outname;
+    QString suggestion = filebasename;
 	while(true) {
 		accepted = (exec() == QDialog::Accepted);
 		if(!accepted) {
 			break;
 		}
 
-		QString suggestion = filebasename;
 		if(suggestion.isEmpty()) {
 			QList<Source*> sources = MAIN->getSourceManager()->getSelectedSources();
 			suggestion = !sources.isEmpty() ? QFileInfo(sources.first()->displayname).baseName() : _("output");
@@ -497,6 +502,16 @@ bool HOCRPdfExporter::run(QString& filebasename) {
 	if(!failed.isEmpty()) {
 		QMessageBox::warning(MAIN, _("Errors occurred"), _("The following pages could not be rendered:\n%1").arg(failed.join("\n")));
 	}
+
+    // Set PDF info
+    // TODO: Add fields to the UI with default values
+    auto pdfInfo = document->GetInfo();
+    pdfInfo->SetProducer(ui.lineEditProducer->text().toStdString());
+    pdfInfo->SetCreator(ui.lineEditCreator->text().toStdString());
+    pdfInfo->SetTitle(ui.lineEditTitle->text().toStdString());
+    pdfInfo->SetSubject(ui.lineEditSubject->text().toStdString());
+    pdfInfo->SetKeywords(ui.lineEditKeywords->text().toStdString());
+    pdfInfo->SetAuthor(ui.lineEditAuthor->text().toStdString());
 
 	QString errMsg;
 	bool success = pdfprinter.finalize(&errMsg);
