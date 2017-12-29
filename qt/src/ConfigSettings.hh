@@ -214,10 +214,10 @@ private:
 };
 
 class LineEditSetting : public AbstractSetting {
-Q_OBJECT
+	Q_OBJECT
 public:
 	LineEditSetting(const QString& key, QLineEdit* lineEdit, const QString& defaultValue = "")
-			: AbstractSetting(key), m_lineEdit(lineEdit) {
+		: AbstractSetting(key), m_lineEdit(lineEdit) {
 		lineEdit->setText(QSettings().value(m_key, QVariant::fromValue(defaultValue)).toString());
 		connect(lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(serialize()));
 	}
