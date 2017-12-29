@@ -551,16 +551,6 @@ bool HOCRPdfExporter::run(QString& filebasename) {
 		QMessageBox::warning(MAIN, _("Errors occurred"), _("The following pages could not be rendered:\n%1").arg(failed.join("\n")));
 	}
 
-    // Set PDF info
-    // TODO: Add fields to the UI with default values
-    auto pdfInfo = document->GetInfo();
-    pdfInfo->SetProducer(ui.lineEditProducer->text().toStdString());
-    pdfInfo->SetCreator(ui.lineEditCreator->text().toStdString());
-    pdfInfo->SetTitle(ui.lineEditTitle->text().toStdString());
-    pdfInfo->SetSubject(ui.lineEditSubject->text().toStdString());
-    pdfInfo->SetKeywords(ui.lineEditKeywords->text().toStdString());
-    pdfInfo->SetAuthor(ui.lineEditAuthor->text().toStdString());
-
 	QString errMsg;
 	bool success = pdfprinter.finalize(&errMsg);
 	if(!success) {
