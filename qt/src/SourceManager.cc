@@ -110,6 +110,10 @@ int SourceManager::addSources(const QStringList& files) {
 		if(!querySourcePassword(filename, password)) {
 			continue;
 		}
+
+		// Check text layer
+		checkTextLayer(filename);
+
 		Source* source = new Source(filename, QFileInfo(filename).fileName(), password);
 		item = new QListWidgetItem(QFileInfo(filename).fileName(), ui.listWidgetSources);
 		item->setToolTip(filename);
@@ -154,6 +158,27 @@ bool SourceManager::querySourcePassword(const QString& filename, QByteArray& pas
 		}
 	}
 	return success;
+}
+
+void SourceManager::checkTextLayer(const QString& filename) const {
+	if(filename.endsWith(".pdf", Qt::CaseInsensitive)) {
+		std::unique_ptr<Poppler::Document> document(Poppler::Document::load(filename));
+		bool withoutText = true;
+		if(document) {
+			const int pagesNbr = document->numPages();
+
+			for (int i = 0; i < pagesNbr; ++i) {
+				QString text = document->page(i)->text(QRectF());
+				if(!text.isEmpty()) {
+					withoutText = false;
+				}
+			}
+		}
+
+		if(!withoutText) {
+			QMessageBox::information(MAIN->getInstance(), _("Searchable PDF"), _("The PDF file already has text inside."));
+		}
+	}
 }
 
 QList<Source*> SourceManager::getSelectedSources() const {
